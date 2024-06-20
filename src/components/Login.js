@@ -31,12 +31,17 @@ const Login = ({ setAuthenticated }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await validateLogin(email, loginId, loginPassword);
-      setAuthenticated(true);
-      setNotification({ open: true, message: 'Login successful.', severity: 'success' });
-      navigate('/dashboard');
+      const { user } = await validateLogin(email, loginId, loginPassword);
+
+      if (user.role === 'admin') {
+        setAuthenticated(true);
+        setNotification({ open: true, message: 'Login successful.', severity: 'success' });
+        navigate('/dashboard');
+      } else {
+        throw new Error('Access denied. Only admins can log in.');
+      }
     } catch (error) {
-      setNotification({ open: true, message: 'Login failed.', severity: 'error' });
+      setNotification({ open: true, message: error.message || 'Login failed.', severity: 'error' });
     } finally {
       setLoading(false);
     }
